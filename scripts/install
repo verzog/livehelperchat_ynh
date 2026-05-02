@@ -67,9 +67,9 @@ apply_template "/etc/nginx/conf.d/$domain.d/$app.conf"
 systemctl reload nginx
 
 #=================================================
-# CLI INSTALLATION
+# CLI INSTALLATION (OPTIONAL)
 #=================================================
-ynh_script_progression "Running CLI installation..."
+ynh_script_progression "Running CLI installation (optional)..."
 
 cp "$install_dir/cli/install-cli.php" "$install_dir/install-cli.php"
 
@@ -90,7 +90,11 @@ chmod 600 "$install_dir/cli/settings.ini"
 chown "$app" "$install_dir/cli/settings.ini"
 
 pushd "$install_dir"
-    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini
+    # Try CLI install but don't fail if it doesn't work — user can complete via web UI
+    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini || {
+        echo "⚠ CLI installation failed (this is non-blocking)"
+        echo "Complete setup via the web UI at: https://$domain$path/"
+    }
 popd
 
 rm -f "$install_dir/install-cli.php"
