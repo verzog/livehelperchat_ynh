@@ -112,7 +112,7 @@ if [ ! -f "$settings_file" ]; then
 fi
 
 # ADD THE LINE HERE:
-ynh_replace_variable "site_address' => '.*'" "site_address' => 'https://$domain$path'" "$settings_file"
+sed -i "s|'site_address' => '.*'|'site_address' => 'https://$domain$path'|g" "$settings_file"
 
 # Namespace the PHP session cookie to avoid conflicts
 sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
