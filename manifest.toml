@@ -70,6 +70,7 @@ ram.runtime = "128M"
 
     [resources.permissions]
     main.url = "/"
+    main.allowed = "visitors"
 
     [resources.apt]
     packages = [
