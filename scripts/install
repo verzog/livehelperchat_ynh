@@ -67,34 +67,38 @@ apply_template "/etc/nginx/conf.d/$domain.d/$app.conf"
 systemctl reload nginx
 
 #=================================================
-# CLI INSTALLATION (OPTIONAL)
+# CLI INSTALLATION
 #=================================================
-ynh_script_progression "Running CLI installation (optional)..."
+ynh_script_progression "Running CLI installation..."
 
+# Patch upstream PHP parse errors in cli/lib/install.php
+# (LHC 4.84v ships with two `$Errors = []` lines missing trailing semicolons)
+sed -i 's/^\(\s*\$Errors = \[\]\)$/\1;/' "$install_dir/cli/lib/install.php"
+
+# install-cli.php uses relative paths, so it must be invoked from $install_dir
 cp "$install_dir/cli/install-cli.php" "$install_dir/install-cli.php"
 
+# Settings file format per cli/lib/install.php: [db] + [admin] sections
 cat > "$install_dir/cli/settings.ini" << EOF
-[default]
-db_host = "localhost"
-db_port = "3306"
-db_user = "$db_user"
-db_password = "$db_pwd"
-db_name = "$db_name"
-admin_username = "$admin"
-admin_password = "$admin_password"
-admin_email = "$admin_email"
-site_address = "https://$domain$path/"
+[db]
+host = "localhost"
+port = "3306"
+user = "$db_user"
+password = "$db_pwd"
+database = "$db_name"
+
+[admin]
+AdminUsername = "$admin"
+AdminPassword = "$admin_password"
+AdminEmail = "$admin_email"
+DefaultDepartament = "Support"
 EOF
 
 chmod 600 "$install_dir/cli/settings.ini"
 chown "$app" "$install_dir/cli/settings.ini"
 
 pushd "$install_dir"
-    # Try CLI install but don't fail if it doesn't work — user can complete via web UI
-    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini || {
-        echo "⚠ CLI installation failed (this is non-blocking)"
-        echo "Complete setup via the web UI at: https://$domain$path/"
-    }
+    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini
 popd
 
 rm -f "$install_dir/install-cli.php"
