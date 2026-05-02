@@ -62,7 +62,6 @@ ram.runtime = "128M"
     sha256 = "ea1d1b697fae10ab3132f8aa4e27ed5f5a26dca24fb5dae03619b189fe49a42d"
     format = "tar.gz"
     in_subdir = true
-    rename = "lhc_web"
 
     [resources.system_user]
 
