@@ -13,6 +13,14 @@ apply_template() {
     local tpl_domain="${2:-$domain}"
     local tpl_path="${3:-$path}"
 
+    # Normalize root path "/" to empty so __PATH__/ becomes "/" not "//"
+    # and so the sub-path SSO catch blocks (which would self-redirect at root)
+    # can be stripped before substitution.
+    if [[ "$tpl_path" == "/" ]]; then
+        tpl_path=""
+        sed -i '/# LHC_SUBPATH_SSO_CATCH_START/,/# LHC_SUBPATH_SSO_CATCH_END/d' "$file"
+    fi
+
     sed -i \
         -e "s|__APP__|${app}|g" \
         -e "s|__NAME__|${app}|g" \
