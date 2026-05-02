@@ -22,6 +22,11 @@ fi
 
 chown -R "$app:www-data" "$install_dir"
 
+# Ensure install_dir and all subdirs are readable/writable by app user
+# (YunoHost provision sets restrictive perms that chown alone doesn't fix)
+chmod 755 "$install_dir"
+chmod -R u+rw,g-w,o-rwx "$install_dir"
+
 #=================================================
 # SET FOLDER PERMISSIONS
 #=================================================
