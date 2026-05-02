@@ -7,7 +7,7 @@ name = "Live Helper Chat"
 description.en = "Open-source live support chat with bot, Voice, Video, and ScreenShare support"
 description.fr = "Chat de support en direct open-source avec bot, Voice, Vidéo et partage d'écran"
 
-version = "4.74~ynh1"
+version = "4.84~ynh1"
 
 [[maintainers]]
 name = "Verzog"
@@ -58,8 +58,8 @@ ram.runtime = "128M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/LiveHelperChat/livehelperchat/releases/download/4.74/4.74v-with-dependencies.tgz"
-    sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+    url = "https://github.com/LiveHelperChat/livehelperchat/releases/download/4.84v/4.84v-with-dependencies.tgz"
+    sha256 = "ea1d1b697fae10ab3132f8aa4e27ed5f5a26dca24fb5dae03619b189fe49a42d"
     format = "tar.gz"
     in_subdir = true
     rename = "lhc_web"
