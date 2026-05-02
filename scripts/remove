@@ -18,7 +18,8 @@ rm -f "/etc/cron.d/$app"
 ynh_script_progression "Removing PHP-FPM configuration..."
 
 rm -f "/etc/php/$php_version/fpm/pool.d/$app.conf"
-systemctl reload "php${php_version}-fpm" || true
+# Restart (not reload) to recover from a broken pool config left by a failed install
+systemctl restart "php${php_version}-fpm" || true
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
