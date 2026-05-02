@@ -46,8 +46,9 @@ chmod -R 775 "$install_dir/cache/"
 ynh_script_progression "Running database upgrade..."
 
 pushd "$install_dir"
-    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/update_database
-    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/clear_cache -p 1
+    # Database updates are non-blocking — they're nice to have but optional
+    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/update_database || true
+    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/clear_cache -p 1 || true
 popd
 
 #=================================================
