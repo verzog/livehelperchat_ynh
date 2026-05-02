@@ -1,0 +1,61 @@
+#!/bin/bash
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Upgrading source files..."
+
+ynh_setup_source --dest_dir="$install_dir" --keep="settings/settings.ini.php"
+
+chown -R "$app:www-data" "$install_dir"
+
+#=================================================
+# SET FOLDER PERMISSIONS
+#=================================================
+ynh_script_progression "Restoring folder permissions..."
+
+chmod 755 "$install_dir/settings/"
+chmod -R 755 "$install_dir/var/storage"
+chmod -R 755 "$install_dir/var/userphoto"
+chmod -R 755 "$install_dir/var/storageform"
+chmod -R 755 "$install_dir/var/storageadmintheme"
+chmod -R 755 "$install_dir/var/botphoto"
+chmod -R 755 "$install_dir/var/bottrphoto"
+chmod -R 755 "$install_dir/var/storageinvitation"
+chmod -R 755 "$install_dir/var/storagedocshare"
+chmod -R 755 "$install_dir/var/storagetheme"
+chmod -R 755 "$install_dir/var/tmpfiles"
+chmod -R 755 "$install_dir/cache/"
+
+#=================================================
+# RUN DATABASE UPGRADE
+#=================================================
+ynh_script_progression "Running database upgrade..."
+
+pushd "$install_dir"
+    ynh_exec_as_app php$php_version cron.php -s site_admin -c cron/util/update_database
+    ynh_exec_as_app php$php_version cron.php -s site_admin -c cron/util/clear_cache -p 1
+popd
+
+#=================================================
+# REAPPLY NGINX AND PHP-FPM CONFIGS
+#=================================================
+ynh_script_progression "Upgrading NGINX web server configuration..."
+
+ynh_config_add_phpfpm
+ynh_config_add_nginx
+
+#=================================================
+# UPDATE CRON JOB
+#=================================================
+ynh_script_progression "Updating cron job..."
+
+ynh_config_add --template="lhc_cron" --destination="/etc/cron.d/$app"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression "Upgrade of $app completed"

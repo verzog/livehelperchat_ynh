@@ -1,0 +1,66 @@
+#!/bin/bash
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_script_progression "Restoring the app main directory..."
+
+ynh_restore "$install_dir"
+
+chown -R "$app:www-data" "$install_dir"
+
+#=================================================
+# RESTORE FOLDER PERMISSIONS
+#=================================================
+chmod 755 "$install_dir/settings/"
+chmod -R 755 "$install_dir/var/storage"
+chmod -R 755 "$install_dir/var/userphoto"
+chmod -R 755 "$install_dir/var/storageform"
+chmod -R 755 "$install_dir/var/storageadmintheme"
+chmod -R 755 "$install_dir/var/botphoto"
+chmod -R 755 "$install_dir/var/bottrphoto"
+chmod -R 755 "$install_dir/var/storageinvitation"
+chmod -R 755 "$install_dir/var/storagedocshare"
+chmod -R 755 "$install_dir/var/storagetheme"
+chmod -R 755 "$install_dir/var/tmpfiles"
+chmod -R 755 "$install_dir/cache/"
+
+#=================================================
+# RESTORE THE MYSQL DATABASE
+#=================================================
+ynh_script_progression "Restoring the MySQL database..."
+
+ynh_mysql_db_shell < db.sql
+
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression "Restoring NGINX web server configuration..."
+
+ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
+# RESTORE THE PHP-FPM CONFIGURATION
+#=================================================
+ynh_script_progression "Restoring PHP-FPM configuration..."
+
+ynh_restore "/etc/php/$php_version/fpm/pool.d/$app.conf"
+ynh_systemctl --service="php${php_version}-fpm" --action=reload
+
+#=================================================
+# RESTORE CRON JOB
+#=================================================
+ynh_restore "/etc/cron.d/$app"
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_systemctl --service=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression "Restoration completed for $app"

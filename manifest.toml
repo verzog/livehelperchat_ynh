@@ -1,0 +1,91 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "livehelperchat"
+name = "Live Helper Chat"
+description.en = "Open-source live support chat with bot, Voice, Video, and ScreenShare support"
+description.fr = "Chat de support en direct open-source avec bot, Voice, Vidéo et partage d'écran"
+
+version = "4.74~ynh1"
+
+maintainers = []
+
+[upstream]
+license = "Apache-2.0"
+website = "https://livehelperchat.com"
+demo = "https://demo.livehelperchat.com"
+admindoc = "https://doc.livehelperchat.com/docs/install"
+code = "https://github.com/LiveHelperChat/livehelperchat"
+
+[integration]
+yunohost = ">= 11.2"
+architectures = "all"
+multi_instance = true
+ldap = false
+sso = false
+disk = "150M"
+ram.build = "256M"
+ram.runtime = "128M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/lhc"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
+
+    [install.admin]
+    type = "user"
+
+    [install.admin_email]
+    ask.en = "Admin email address"
+    ask.fr = "Adresse email de l'administrateur"
+    type = "email"
+    example = "admin@example.com"
+
+    [install.admin_password]
+    ask.en = "Admin password for Live Helper Chat"
+    ask.fr = "Mot de passe administrateur pour Live Helper Chat"
+    type = "password"
+
+[resources]
+    [resources.sources.main]
+    url = "https://github.com/LiveHelperChat/livehelperchat/releases/download/4.74/4.74v-with-dependencies.tgz"
+    sha256 = "REPLACE_WITH_ACTUAL_SHA256_AFTER_DOWNLOAD"
+    format = "tar.gz"
+    in_subdir = true
+    rename = "lhc_web"
+
+    [resources.system_user]
+
+    [resources.install_dir]
+    dir = "/var/www/__APP__"
+
+    [resources.permissions]
+    main.url = "/"
+
+    [resources.apt]
+    packages = [
+        "php8.2-fpm",
+        "php8.2-cli",
+        "php8.2-gd",
+        "php8.2-xml",
+        "php8.2-common",
+        "php8.2-pdo",
+        "php8.2-mysql",
+        "php8.2-mbstring",
+        "php8.2-bcmath",
+        "php8.2-zip",
+        "php8.2-curl",
+        "php8.2-intl",
+        "mariadb-server",
+    ]
+
+    [resources.database]
+    type = "mysql"

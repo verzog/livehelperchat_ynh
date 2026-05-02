@@ -1,0 +1,22 @@
+test_format = 1.0
+
+[default]
+    # Default test suite - checks basic install, upgrade, backup/restore
+    exclude_integrations = []
+
+    # Check that the app root (login page) is accessible
+    test_install = true
+    test_upgrade = true
+    test_backup_restore = true
+    test_change_url = true
+
+    # Checks
+    [[default.test_manifest_coherence]]
+
+    [[default.test_web_paths]]
+    path = "/"
+    expect_return_code = 200
+
+    [[default.test_web_paths]]
+    path = "/index.php/site_admin/user/login"
+    expect_return_code = 200

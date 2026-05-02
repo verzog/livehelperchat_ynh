@@ -1,0 +1,31 @@
+#!/bin/bash
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# MODIFY URL IN APP CONFIG
+#=================================================
+ynh_script_progression "Updating Live Helper Chat site address..."
+
+settings_file="$install_dir/settings/settings.ini.php"
+
+# Update the site address in settings if it's stored there
+# (LHC stores its base URL in the database, not in settings.ini.php,
+#  so a DB update via the web UI may be needed post-migration)
+
+ynh_replace --match="site_address = .*" \
+            --replace="site_address = 'https://${new_domain}${new_path}/'" \
+            --file="$settings_file" || true
+
+#=================================================
+# UPDATE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression "Updating NGINX web server configuration..."
+
+ynh_config_change_url_nginx
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression "Change of URL completed for $app"
