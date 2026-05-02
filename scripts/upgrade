@@ -12,14 +12,12 @@ ynh_script_progression "Upgrading source files..."
 
 ynh_setup_source --dest_dir="$install_dir" --keep="settings/settings.ini.php"
 
-# The tarball extracts to install_dir/lhc_web/
-# Move the actual application files to the install_dir root
+# The tarball extracts to install_dir/lhc_web/ — move contents up one level
 if [ -d "$install_dir/lhc_web" ]; then
-    # Use shopt to include hidden files in the glob pattern
     shopt -s dotglob
     mv "$install_dir/lhc_web"/* "$install_dir/" 2>/dev/null || true
     shopt -u dotglob
-    rm -rf "$install_dir/lhc_web" || true
+    rm -rf "$install_dir/lhc_web"
 fi
 
 chown -R "$app:www-data" "$install_dir"
@@ -27,7 +25,7 @@ chown -R "$app:www-data" "$install_dir"
 #=================================================
 # SET FOLDER PERMISSIONS
 #=================================================
-ynh_script_progression "Restoring folder permissions..."
+ynh_script_progression "Setting folder permissions..."
 
 chmod 755 "$install_dir/settings/"
 chmod -R 775 "$install_dir/var/storage"
@@ -48,42 +46,40 @@ chmod -R 775 "$install_dir/cache/"
 ynh_script_progression "Running database upgrade..."
 
 pushd "$install_dir"
-    ynh_exec_as_app php$php_version cron.php -s site_admin -c cron/util/update_database
-    ynh_exec_as_app php$php_version cron.php -s site_admin -c cron/util/clear_cache -p 1
+    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/update_database
+    sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/clear_cache -p 1
 popd
 
 #=================================================
-# REAPPLY NGINX AND PHP-FPM CONFIGS
+# PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression "Configuring PHP-FPM..."
 
 mkdir -p "/etc/php/$php_version/fpm/pool.d"
 cp "../conf/php-fpm.conf" "/etc/php/$php_version/fpm/pool.d/$app.conf"
+apply_template "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
-ynh_replace --match="__NAME__" --replace="$app" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
-ynh_replace --match="__APP__" --replace="$app" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
-ynh_replace --match="__PHP_VERSION__" --replace="$php_version" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
+systemctl reload "php${php_version}-fpm"
 
-ynh_systemctl --service="php${php_version}-fpm" --action=reload
-
-ynh_script_progression "Configuring NGINX..."
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression "Configuring NGINX web server..."
 
 mkdir -p "/etc/nginx/conf.d/$domain.d"
 cp "../conf/nginx.conf" "/etc/nginx/conf.d/$domain.d/$app.conf"
+apply_template "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-ynh_replace --match="__INSTALL_DIR__" --replace="$install_dir" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__PATH__" --replace="$path" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__NAME__" --replace="$app" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__PHP_VERSION__" --replace="$php_version" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-ynh_systemctl --service=nginx --action=reload
+systemctl reload nginx
 
 #=================================================
 # UPDATE CRON JOB
 #=================================================
 ynh_script_progression "Updating cron job..."
 
-ynh_config_add --template="lhc_cron" --destination="/etc/cron.d/$app"
+cp "../conf/lhc_cron" "/etc/cron.d/$app"
+apply_template "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # END OF SCRIPT

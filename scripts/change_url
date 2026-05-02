@@ -12,13 +12,8 @@ ynh_script_progression "Updating Live Helper Chat site address..."
 
 settings_file="$install_dir/settings/settings.ini.php"
 
-# Update the site address in settings if it's stored there
-# (LHC stores its base URL in the database, not in settings.ini.php,
-#  so a DB update via the web UI may be needed post-migration)
-
-ynh_replace --match="site_address = .*" \
-            --replace="site_address = 'https://${new_domain}${new_path}/'" \
-            --file="$settings_file" || true
+# LHC stores its base URL in the database; update settings.ini.php as a best-effort fallback
+sed -i "s|site_address = .*|site_address = 'https://${new_domain}${new_path}/'|g" "$settings_file" || true
 
 #=================================================
 # UPDATE NGINX CONFIGURATION
@@ -28,15 +23,14 @@ ynh_script_progression "Updating NGINX web server configuration..."
 mkdir -p "/etc/nginx/conf.d/$new_domain.d"
 cp "../conf/nginx.conf" "/etc/nginx/conf.d/$new_domain.d/$app.conf"
 
-ynh_replace --match="__INSTALL_DIR__" --replace="$install_dir" --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
-ynh_replace --match="__PATH__" --replace="$new_path" --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
-ynh_replace --match="__NAME__" --replace="$app" --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
-ynh_replace --match="__PHP_VERSION__" --replace="$php_version" --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
+apply_template "/etc/nginx/conf.d/$new_domain.d/$app.conf" "$new_domain" "$new_path"
 
-# Remove old NGINX config
-ynh_safe_rm "/etc/nginx/conf.d/$domain.d/$app.conf"
+# Remove old config if domain changed
+if [ "$domain" != "$new_domain" ]; then
+    rm -f "/etc/nginx/conf.d/$domain.d/$app.conf"
+fi
 
-ynh_systemctl --service=nginx --action=reload
+systemctl reload nginx
 
 #=================================================
 # END OF SCRIPT
