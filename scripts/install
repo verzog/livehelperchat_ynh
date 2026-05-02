@@ -106,16 +106,19 @@ rm -f "$install_dir/cli/settings.ini"
 ynh_script_progression "Applying application settings..."
 
 settings_file="$install_dir/settings/settings.ini.php"
+
 if [ ! -f "$settings_file" ]; then
     cp "$install_dir/settings/settings.ini.default.php" "$settings_file"
 fi
 
-# Namespace the PHP session cookie to avoid conflicts with other apps on the same domain
+# ADD THE LINE HERE:
+ynh_replace_variable "site_address' => '.*'" "site_address' => 'https://$domain$path'" "$settings_file"
+
+# Namespace the PHP session cookie to avoid conflicts
 sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
 
 chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"
-
 #=================================================
 # SETUP CRON JOB
 #=================================================
