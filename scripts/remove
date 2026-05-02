@@ -10,23 +10,23 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression "Removing cron job..."
 
-ynh_safe_rm "/etc/cron.d/$app"
+rm -f "/etc/cron.d/$app"
 
 #=================================================
 # REMOVE PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression "Removing PHP-FPM configuration..."
 
-ynh_config_remove --template="$app" --destination="/etc/php/$php_version/fpm/pool.d/$app.conf"
-ynh_systemctl --service="php${php_version}-fpm" --action=reload || true
+rm -f "/etc/php/$php_version/fpm/pool.d/$app.conf"
+systemctl reload "php${php_version}-fpm" || true
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
 ynh_script_progression "Removing NGINX configuration..."
 
-ynh_config_remove --template="$app" --destination="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_systemctl --service=nginx --action=reload || true
+rm -f "/etc/nginx/conf.d/$domain.d/$app.conf"
+systemctl reload nginx || true
 
 #=================================================
 # END OF SCRIPT

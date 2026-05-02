@@ -10,17 +10,14 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-# Download, check integrity, uncompress and patch the source from manifest.toml
 ynh_setup_source --dest_dir="$install_dir"
 
-# The tarball extracts to install_dir/lhc_web/
-# Move the actual application files to the install_dir root
+# The tarball extracts to install_dir/lhc_web/ — move contents up one level
 if [ -d "$install_dir/lhc_web" ]; then
-    # Use shopt to include hidden files in the glob pattern
     shopt -s dotglob
     mv "$install_dir/lhc_web"/* "$install_dir/" 2>/dev/null || true
     shopt -u dotglob
-    rm -rf "$install_dir/lhc_web" || true
+    rm -rf "$install_dir/lhc_web"
 fi
 
 chown -R "$app:www-data" "$install_dir"
@@ -50,12 +47,9 @@ ynh_script_progression "Configuring PHP-FPM..."
 
 mkdir -p "/etc/php/$php_version/fpm/pool.d"
 cp "../conf/php-fpm.conf" "/etc/php/$php_version/fpm/pool.d/$app.conf"
+apply_template "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
-ynh_replace --match="__NAME__" --replace="$app" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
-ynh_replace --match="__APP__" --replace="$app" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
-ynh_replace --match="__PHP_VERSION__" --replace="$php_version" --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
-
-ynh_systemctl --service="php${php_version}-fpm" --action=reload
+systemctl reload "php${php_version}-fpm"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -64,23 +58,17 @@ ynh_script_progression "Configuring NGINX web server..."
 
 mkdir -p "/etc/nginx/conf.d/$domain.d"
 cp "../conf/nginx.conf" "/etc/nginx/conf.d/$domain.d/$app.conf"
+apply_template "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-ynh_replace --match="__INSTALL_DIR__" --replace="$install_dir" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__PATH__" --replace="$path" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__NAME__" --replace="$app" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_replace --match="__PHP_VERSION__" --replace="$php_version" --file="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-ynh_systemctl --service=nginx --action=reload
+systemctl reload nginx
 
 #=================================================
 # CLI INSTALLATION
 #=================================================
 ynh_script_progression "Running CLI installation..."
 
-# Copy the CLI installer into place
 cp "$install_dir/cli/install-cli.php" "$install_dir/install-cli.php"
 
-# Build the settings file for CLI install
 cat > "$install_dir/cli/settings.ini" << EOF
 [default]
 db_host = "localhost"
@@ -97,21 +85,12 @@ EOF
 chmod 600 "$install_dir/cli/settings.ini"
 chown "$app" "$install_dir/cli/settings.ini"
 
-# Run CLI installation
 pushd "$install_dir"
-    ynh_exec_as_app php$php_version install-cli.php cli/settings.ini
+    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini
 popd
 
-# Remove install script and settings
-ynh_safe_rm "$install_dir/install-cli.php"
-ynh_safe_rm "$install_dir/cli/settings.ini"
-
-#=================================================
-# SETUP CRON JOB
-#=================================================
-ynh_script_progression "Setting up cron job..."
-
-ynh_config_add --template="lhc_cron" --destination="/etc/cron.d/$app"
+rm -f "$install_dir/install-cli.php"
+rm -f "$install_dir/cli/settings.ini"
 
 #=================================================
 # CONFIGURE SETTINGS.INI.PHP
@@ -123,10 +102,8 @@ if [ ! -f "$settings_file" ]; then
     cp "$install_dir/settings/settings.ini.default.php" "$settings_file"
 fi
 
-# Set the PHP session cookie name to avoid conflicts with other apps
-ynh_replace --match="php_session_cookie_name = .*" \
-            --replace="php_session_cookie_name = '${app}_session'" \
-            --file="$settings_file"
+# Namespace the PHP session cookie to avoid conflicts with other apps on the same domain
+sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
 
 chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"
@@ -136,7 +113,9 @@ chmod 640 "$settings_file"
 #=================================================
 ynh_script_progression "Setting up cron job..."
 
-ynh_config_add --template="lhc_cron" --destination="/etc/cron.d/$app"
+cp "../conf/lhc_cron" "/etc/cron.d/$app"
+apply_template "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # END OF SCRIPT
