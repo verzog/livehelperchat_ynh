@@ -15,8 +15,11 @@ ynh_setup_source --dest_dir="$install_dir" --keep="settings/settings.ini.php"
 # The tarball extracts to install_dir/lhc_web/
 # Move the actual application files to the install_dir root
 if [ -d "$install_dir/lhc_web" ]; then
-    mv "$install_dir/lhc_web"/* "$install_dir/"
-    rmdir "$install_dir/lhc_web"
+    # Use shopt to include hidden files in the glob pattern
+    shopt -s dotglob
+    mv "$install_dir/lhc_web"/* "$install_dir/" 2>/dev/null || true
+    shopt -u dotglob
+    rm -rf "$install_dir/lhc_web" || true
 fi
 
 chown -R "$app:www-data" "$install_dir"
