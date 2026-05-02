@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -u
+source _common.sh
+source /usr/share/yunohost/helpers
+ynh_abort_if_errors
+
+#=================================================
+# "INFOS" ACTION
+#=================================================
+if [ "$YNH_ACTION" == "info" ]; then
+    ynh_script_progression "Retrieving configuration info..."
+
+    settings_file="$install_dir/settings/settings.ini.php"
+
+    # Extract PHP session cookie name
+    if grep -q "php_session_cookie_name" "$settings_file"; then
+        php_session_cookie=$(grep "php_session_cookie_name" "$settings_file" | sed "s/.*= '//" | sed "s/'.*//")
+        ynh_return "php_session_cookie=$php_session_cookie"
+    fi
+
+    ynh_return "php_memory_limit=128M"
+    ynh_return "php_upload_limit=50M"
+    ynh_return "cron_frequency=5"
+
+#=================================================
+# "CHANGE" ACTION
+#=================================================
+elif [ "$YNH_ACTION" == "change" ]; then
+    ynh_script_progression "Applying configuration changes..."
+
+    settings_file="$install_dir/settings/settings.ini.php"
+
+    # Update PHP settings if provided
+    if [ -n "${php_memory_limit:-}" ]; then
+        ynh_replace --match="php_admin_value\[memory_limit\] = .*" \
+                    --replace="php_admin_value[memory_limit] = $php_memory_limit" \
+                    --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
+    fi
+
+    if [ -n "${php_upload_limit:-}" ]; then
+        ynh_replace --match="php_admin_value\[upload_max_filesize\] = .*" \
+                    --replace="php_admin_value[upload_max_filesize] = $php_upload_limit" \
+                    --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
+        ynh_replace --match="php_admin_value\[post_max_size\] = .*" \
+                    --replace="php_admin_value[post_max_size] = $php_upload_limit" \
+                    --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
+    fi
+
+    # Reload PHP-FPM if changes were made
+    ynh_systemctl --service="php${php_version}-fpm" --action=reload
+
+    ynh_script_progression "Configuration updated successfully"
+
+fi

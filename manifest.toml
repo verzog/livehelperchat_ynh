@@ -9,7 +9,9 @@ description.fr = "Chat de support en direct open-source avec bot, Voice, Vidéo 
 
 version = "4.74~ynh1"
 
-maintainers = []
+[[maintainers]]
+name = "Verzog"
+email = "support@example.com"
 
 [upstream]
 license = "Apache-2.0"
@@ -57,7 +59,7 @@ ram.runtime = "128M"
 [resources]
     [resources.sources.main]
     url = "https://github.com/LiveHelperChat/livehelperchat/releases/download/4.74/4.74v-with-dependencies.tgz"
-    sha256 = "REPLACE_WITH_ACTUAL_SHA256_AFTER_DOWNLOAD"
+    sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
     format = "tar.gz"
     in_subdir = true
     rename = "lhc_web"
