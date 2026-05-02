@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -u
 source _common.sh
 source /usr/share/yunohost/helpers
+ynh_abort_if_errors
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -18,17 +20,17 @@ chown -R "$app:www-data" "$install_dir"
 ynh_script_progression "Restoring folder permissions..."
 
 chmod 755 "$install_dir/settings/"
-chmod -R 755 "$install_dir/var/storage"
-chmod -R 755 "$install_dir/var/userphoto"
-chmod -R 755 "$install_dir/var/storageform"
-chmod -R 755 "$install_dir/var/storageadmintheme"
-chmod -R 755 "$install_dir/var/botphoto"
-chmod -R 755 "$install_dir/var/bottrphoto"
-chmod -R 755 "$install_dir/var/storageinvitation"
-chmod -R 755 "$install_dir/var/storagedocshare"
-chmod -R 755 "$install_dir/var/storagetheme"
-chmod -R 755 "$install_dir/var/tmpfiles"
-chmod -R 755 "$install_dir/cache/"
+chmod -R 775 "$install_dir/var/storage"
+chmod -R 775 "$install_dir/var/userphoto"
+chmod -R 775 "$install_dir/var/storageform"
+chmod -R 775 "$install_dir/var/storageadmintheme"
+chmod -R 775 "$install_dir/var/botphoto"
+chmod -R 775 "$install_dir/var/bottrphoto"
+chmod -R 775 "$install_dir/var/storageinvitation"
+chmod -R 775 "$install_dir/var/storagedocshare"
+chmod -R 775 "$install_dir/var/storagetheme"
+chmod -R 775 "$install_dir/var/tmpfiles"
+chmod -R 775 "$install_dir/cache/"
 
 #=================================================
 # RUN DATABASE UPGRADE
