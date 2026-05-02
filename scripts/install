@@ -103,7 +103,7 @@ chmod 600 "$install_dir/cli/settings.ini"
 chown "$app" "$install_dir/cli/settings.ini"
 
 pushd "$install_dir"
-    sudo -u "$app" php${php_version} install-cli.php cli/settings.ini
+    sudo -u "$app" php${php_version} "$install_dir/install-cli.php" cli/settings.ini
 popd
 
 rm -f "$install_dir/install-cli.php"
