@@ -59,6 +59,9 @@ mkdir -p "/etc/php/$php_version/fpm/pool.d"
 cp "../conf/php-fpm.conf" "/etc/php/$php_version/fpm/pool.d/$app.conf"
 apply_template "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
+php-fpm${php_version} --test 2>/dev/null \
+    || { rm -f "/etc/php/$php_version/fpm/pool.d/$app.conf"; ynh_die "PHP-FPM config test failed — pool config removed to protect other sites."; }
+
 systemctl reload "php${php_version}-fpm"
 
 #=================================================
