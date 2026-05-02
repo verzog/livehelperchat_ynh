@@ -48,14 +48,16 @@ chmod -R 775 "$install_dir/cache/"
 #=================================================
 ynh_script_progression "Configuring PHP-FPM..."
 
-ynh_config_add_phpfpm
+ynh_config_add --template="php-fpm" --destination="/etc/php/$php_version/fpm/pool.d/$app.conf"
+ynh_systemctl --service="php${php_version}-fpm" --action=reload
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 ynh_script_progression "Configuring NGINX web server..."
 
-ynh_config_add_nginx
+ynh_config_add --template="nginx" --destination="/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_systemctl --service=nginx --action=reload
 
 #=================================================
 # CLI INSTALLATION
