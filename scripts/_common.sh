@@ -3,4 +3,4 @@
 # Common variables and helpers
 
 # PHP version
-php_version="8.2"
+php_version="8.3"
