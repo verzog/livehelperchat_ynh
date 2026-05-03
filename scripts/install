@@ -114,6 +114,11 @@ cp "$install_dir/cli/install-cli.php" "$install_dir/install-cli.php"
 chown "$app:www-data" "$install_dir/install-cli.php"
 chmod 644 "$install_dir/install-cli.php"
 
+# Patch upstream bug: install-cli.php main() always exits with code 1 even on
+# success, which trips ynh_abort_if_errors. Change exit(1) to exit(0) so the
+# bash script can detect actual failures.
+sed -i 's|^    exit(1);$|    exit(0);|' "$install_dir/install-cli.php"
+
 # Settings file format per cli/lib/install.php: [db] + [admin] sections
 cat > "$install_dir/cli/settings.ini" << EOF
 [db]
