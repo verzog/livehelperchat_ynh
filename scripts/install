@@ -166,9 +166,6 @@ chmod 640 "$settings_file"
 
 # Clear caches to ensure installed flag and settings are recognized
 
-=================================================
-# CLEAR CACHES AND FIX PERMISSIONS
-#=================================================
 # Clear file contents but keep the directory structure where needed
 rm -rf "$install_dir/cache"/*
 rm -rf "$install_dir/var/cacheconfig"/*
