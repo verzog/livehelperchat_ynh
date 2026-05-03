@@ -36,6 +36,7 @@ ynh_script_progression "Setting folder permissions..."
 # Allows both $app user and www-data (PHP) to read/write
 # 750 for base dir already set above (rwxr-x---)
 chmod 770 "$install_dir/settings/"
+chmod 770 "$install_dir/var/"
 chmod -R 770 "$install_dir/var/storage"
 chmod -R 770 "$install_dir/var/userphoto"
 chmod -R 770 "$install_dir/var/storageform"
