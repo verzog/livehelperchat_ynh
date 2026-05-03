@@ -20,6 +20,7 @@ chown -R "$app:www-data" "$install_dir"
 # YunoHost standard: 770 for writable dirs (rwxrwx---)
 # Allows both $app user and www-data (PHP) to read/write
 chmod 770 "$install_dir/settings/"
+chmod 770 "$install_dir/var/"
 chmod -R 770 "$install_dir/var/storage"
 chmod -R 770 "$install_dir/var/userphoto"
 chmod -R 770 "$install_dir/var/storageform"
