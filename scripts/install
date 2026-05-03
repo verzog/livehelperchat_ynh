@@ -180,6 +180,12 @@ chmod 640 "$settings_file"
 rm -rf "$install_dir/cache"/*
 rm -rf "$install_dir/var/cacheconfig"/*
 
+# Ensure cache subdirectories exist with proper permissions
+mkdir -p "$install_dir/cache/cacheconfig"
+chmod 770 "$install_dir/cache/cacheconfig"
+chown -R "$app:www-data" "$install_dir/cache"
+chown -R "$app:www-data" "$install_dir/var/cacheconfig"
+
 # Diagnostic: confirm settings.ini.php has 'installed' => true and DB credentials
 ynh_script_progression "Verifying settings.ini.php..."
 if [ -f "$settings_file" ]; then
