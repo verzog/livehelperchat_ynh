@@ -121,6 +121,8 @@ database = "$db_name"
 AdminUsername = "$admin"
 AdminPassword = "$admin_password"
 AdminEmail = "$admin_email"
+AdminName = "$admin"
+AdminSurname = "Admin"
 DefaultDepartament = "Support"
 EOF
 
