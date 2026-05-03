@@ -186,7 +186,13 @@ chown -R "$app:www-data" "$install_dir/var/cacheconfig"
 
 # Ensure cache subdirectories exist with proper permissions
 mkdir -p "$install_dir/cache/cacheconfig"
+mkdir -p "$install_dir/cache/compiledtemplates"
+mkdir -p "$install_dir/cache/translations"
+mkdir -p "$install_dir/cache/userinfo"
 chmod 770 "$install_dir/cache/cacheconfig"
+chmod 770 "$install_dir/cache/compiledtemplates"
+chmod 770 "$install_dir/cache/translations"
+chmod 770 "$install_dir/cache/userinfo"
 chown -R "$app:www-data" "$install_dir/cache"
 chown -R "$app:www-data" "$install_dir/var/cacheconfig"
 
