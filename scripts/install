@@ -177,8 +177,27 @@ chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"
 
 # Clear caches to ensure installed flag and settings are recognized
+
+=================================================
+# CLEAR CACHES AND FIX PERMISSIONS
+#=================================================
+# Clear file contents but keep the directory structure where needed
 rm -rf "$install_dir/cache"/*
 rm -rf "$install_dir/var/cacheconfig"/*
+
+# Ensure directories exist (mkdir -p is idempotent)
+mkdir -p "$install_dir/cache/cacheconfig"
+mkdir -p "$install_dir/var/cacheconfig"
+
+# Set permissions (770 allows PHP to write)
+chmod 770 "$install_dir/cache/cacheconfig"
+chmod 770 "$install_dir/var/cacheconfig"
+
+# Final ownership sweep
+chown -R "$app:www-data" "$install_dir/cache"
+chown -R "$app:www-data" "$install_dir/var/cacheconfig"
+
+
 
 # Ensure cache subdirectories exist with proper permissions
 mkdir -p "$install_dir/cache/cacheconfig"
