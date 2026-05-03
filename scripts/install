@@ -158,14 +158,24 @@ if [ ! -f "$settings_file" ]; then
     cp "$install_dir/settings/settings.ini.default.php" "$settings_file"
 fi
 
-# ADD THE LINE HERE:
-sed -i "s|'site_address' => '.*'|'site_address' => 'https://$domain$path'|g" "$settings_file"
+# Construct site_address: strip trailing slash from path if it's just "/" to avoid https://domain//
+if [ "$path" = "/" ]; then
+    site_address="https://$domain"
+else
+    site_address="https://$domain$path"
+fi
+sed -i "s|'site_address' => '.*'|'site_address' => '$site_address'|g" "$settings_file"
 
 # Namespace the PHP session cookie to avoid conflicts
 sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
 
 chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"
+
+# Clear caches to ensure installed flag and settings are recognized
+rm -rf "$install_dir/cache"/*
+rm -rf "$install_dir/var/cacheconfig"/*
+
 #=================================================
 # SETUP CRON JOB
 #=================================================
