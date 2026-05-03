@@ -5,9 +5,7 @@ source _common.sh
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
-#=================================================
 ynh_script_progression "Upgrading source files..."
 
 ynh_setup_source --dest_dir="$install_dir" --keep="settings/settings.ini.php"
@@ -22,9 +20,7 @@ fi
 
 chown -R "$app:www-data" "$install_dir"
 
-#=================================================
 # SET FOLDER PERMISSIONS
-#=================================================
 ynh_script_progression "Setting folder permissions..."
 
 # YunoHost standard: 770 for writable dirs (rwxrwx---)
@@ -43,9 +39,7 @@ chmod -R 770 "$install_dir/var/storagetheme"
 chmod -R 770 "$install_dir/var/tmpfiles"
 chmod -R 770 "$install_dir/cache/"
 
-#=================================================
 # RUN DATABASE UPGRADE
-#=================================================
 ynh_script_progression "Running database upgrade..."
 
 pushd "$install_dir"
@@ -54,9 +48,7 @@ pushd "$install_dir"
     sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/clear_cache -p 1 || true
 popd
 
-#=================================================
 # PHP-FPM CONFIGURATION
-#=================================================
 ynh_script_progression "Configuring PHP-FPM..."
 
 mkdir -p "/etc/php/$php_version/fpm/pool.d"
@@ -68,9 +60,7 @@ php-fpm${php_version} --test 2>/dev/null \
 
 systemctl reload "php${php_version}-fpm"
 
-#=================================================
 # NGINX CONFIGURATION
-#=================================================
 ynh_script_progression "Configuring NGINX web server..."
 
 mkdir -p "/etc/nginx/conf.d/$domain.d"
@@ -79,16 +69,12 @@ apply_template "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 systemctl reload nginx
 
-#=================================================
 # UPDATE CRON JOB
-#=================================================
 ynh_script_progression "Updating cron job..."
 
 cp "../conf/lhc_cron" "/etc/cron.d/$app"
 apply_template "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
 
-#=================================================
 # END OF SCRIPT
-#=================================================
 ynh_script_progression "Upgrade of $app completed"
