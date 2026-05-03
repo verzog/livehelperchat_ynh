@@ -169,12 +169,24 @@ sed -i "s|'site_address' => '.*'|'site_address' => '$site_address'|g" "$settings
 # Namespace the PHP session cookie to avoid conflicts
 sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
 
+# Enable debug_output temporarily to surface real errors in browser
+# (remove this once installation is confirmed working)
+sed -i "s|'debug_output' => false|'debug_output' => true|" "$settings_file"
+
 chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"
 
 # Clear caches to ensure installed flag and settings are recognized
 rm -rf "$install_dir/cache"/*
 rm -rf "$install_dir/var/cacheconfig"/*
+
+# Diagnostic: confirm settings.ini.php has 'installed' => true and DB credentials
+ynh_script_progression "Verifying settings.ini.php..."
+if [ -f "$settings_file" ]; then
+    grep -E "'installed'|'database'|'host'|'site_address'" "$settings_file" | head -10 || true
+else
+    echo "WARNING: settings.ini.php not found at $settings_file"
+fi
 
 #=================================================
 # SETUP CRON JOB
