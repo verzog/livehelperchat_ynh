@@ -32,33 +32,6 @@ apply_template() {
         "$file"
 }
 
-build_site_address() {
-    local tpl_domain="${1:-$domain}"
-    local tpl_path="${2:-$path}"
-
-    if [[ "$tpl_path" == "/" ]]; then
-        echo "https://${tpl_domain}"
-    else
-        # Ensure exactly one leading slash and no trailing slash.
-        tpl_path="/${tpl_path#/}"
-        tpl_path="${tpl_path%/}"
-        echo "https://${tpl_domain}${tpl_path}"
-    fi
-}
-
-assert_valid_site_address() {
-    local site_address="$1"
-
-    if [[ -z "$site_address" ]]; then
-        ynh_die "Computed site_address is empty."
-    fi
-
-    # Reject accidental double-slash path, but allow protocol separator.
-    if [[ "$site_address" =~ ^https?://[^/]+// ]]; then
-        ynh_die "Computed site_address is invalid (double slash in path): $site_address"
-    fi
-}
-
 # Set application writable permissions consistently across lifecycle scripts.
 set_lhc_permissions() {
     chmod 770 "$install_dir/settings/"
