@@ -68,6 +68,13 @@ ALTER TABLE `lh_departament_custom_work_hours`
   ADD COLUMN IF NOT EXISTS `repetitiveness` int(11) unsigned NOT NULL DEFAULT 0;
 SQLEOF
 
+# Disable debug_output left over from earlier install scripts that enabled it
+# as a temporary diagnostic. Safe no-op if already false.
+settings_file="$install_dir/settings/settings.ini.php"
+if [ -f "$settings_file" ]; then
+    sed -i "s|'debug_output' => true|'debug_output' => false|" "$settings_file"
+fi
+
 # PHP-FPM CONFIGURATION
 ynh_script_progression "Configuring PHP-FPM..."
 
