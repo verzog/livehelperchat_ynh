@@ -15,19 +15,7 @@ chown -R "$app:www-data" "$install_dir"
 # RESTORE FOLDER PERMISSIONS
 # YunoHost standard: 770 for writable dirs (rwxrwx---)
 # Allows both $app user and www-data (PHP) to read/write
-chmod 770 "$install_dir/settings/"
-chmod 770 "$install_dir/var/"
-chmod -R 770 "$install_dir/var/storage"
-chmod -R 770 "$install_dir/var/userphoto"
-chmod -R 770 "$install_dir/var/storageform"
-chmod -R 770 "$install_dir/var/storageadmintheme"
-chmod -R 770 "$install_dir/var/botphoto"
-chmod -R 770 "$install_dir/var/bottrphoto"
-chmod -R 770 "$install_dir/var/storageinvitation"
-chmod -R 770 "$install_dir/var/storagedocshare"
-chmod -R 770 "$install_dir/var/storagetheme"
-chmod -R 770 "$install_dir/var/tmpfiles"
-chmod -R 770 "$install_dir/cache/"
+set_lhc_permissions
 
 # RESTORE THE MYSQL DATABASE
 ynh_script_progression "Restoring the MySQL database..."
@@ -35,24 +23,7 @@ ynh_script_progression "Restoring the MySQL database..."
 mysql -u "$db_user" -p"$db_pwd" "$db_name" < db.sql
 
 # Create missing lh_abstract_proactive_chat_invitation_one_time table if it doesn't exist
-mysql -u "$db_user" -p"$db_pwd" "$db_name" << 'SQLEOF'
-CREATE TABLE IF NOT EXISTS `lh_abstract_proactive_chat_invitation_one_time` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `vid_id` bigint(20) NOT NULL,
-  `chat_id` bigint(20) DEFAULT NULL,
-  `chat_variables` longtext,
-  `invited_date` bigint(20) NOT NULL,
-  `invited` tinyint(1) NOT NULL DEFAULT 0,
-  `accepted` tinyint(1) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `vid_id` (`vid_id`),
-  KEY `chat_id` (`chat_id`),
-  KEY `invited_date` (`invited_date`)
-) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE `lh_departament_custom_work_hours`
-  ADD COLUMN IF NOT EXISTS `repetitiveness` int(11) unsigned NOT NULL DEFAULT 0;
-SQLEOF
+apply_lhc_schema_workarounds
 
 # RESTORE THE NGINX CONFIGURATION
 ynh_script_progression "Restoring NGINX web server configuration..."
