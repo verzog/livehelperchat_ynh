@@ -18,6 +18,7 @@ apply_template() {
     # can be stripped before substitution.
     if [[ "$tpl_path" == "/" ]]; then
         tpl_path=""
+        sed -i '/# LHC_SUBPATH_REWRITE_START/,/# LHC_SUBPATH_REWRITE_END/d' "$file"
         sed -i '/# LHC_SUBPATH_SSO_CATCH_START/,/# LHC_SUBPATH_SSO_CATCH_END/d' "$file"
     fi
 

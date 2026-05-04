@@ -147,12 +147,8 @@ if [ ! -f "$settings_file" ]; then
     cp "$install_dir/settings/settings.ini.default.php" "$settings_file"
 fi
 
-# Construct site_address: strip trailing slash from path if it's just "/" to avoid https://domain//
-if [ "$path" = "/" ]; then
-    site_address="https://$domain"
-else
-    site_address="https://$domain$path"
-fi
+site_address="$(build_site_address "$domain" "$path")"
+assert_valid_site_address "$site_address"
 sed -i "s|'site_address' => '.*'|'site_address' => '$site_address'|g" "$settings_file"
 
 # Namespace the PHP session cookie to avoid conflicts.

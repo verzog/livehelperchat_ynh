@@ -12,8 +12,12 @@ ynh_script_progression "Updating Live Helper Chat site address..."
 
 settings_file="$install_dir/settings/settings.ini.php"
 
-# LHC stores its base URL in the database; update settings.ini.php as a best-effort fallback
-sed -i "s|site_address = .*|site_address = 'https://${new_domain}${new_path}/'|g" "$settings_file" || true
+site_address="$(build_site_address "$new_domain" "$new_path")"
+assert_valid_site_address "$site_address"
+
+# LHC stores base URL in DB; update settings file as best-effort fallback.
+# settings.ini.php uses PHP array syntax ('site_address' => '...').
+sed -i "s|'site_address' => '.*'|'site_address' => '$site_address'|g" "$settings_file" || true
 
 #=================================================
 # UPDATE NGINX CONFIGURATION
