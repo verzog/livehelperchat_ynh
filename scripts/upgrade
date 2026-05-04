@@ -48,6 +48,23 @@ pushd "$install_dir"
     sudo -u "$app" php${php_version} cron.php -s site_admin -c cron/util/clear_cache -p 1 || true
 popd
 
+# Create missing lh_abstract_proactive_chat_invitation_one_time table if it doesn't exist
+mysql -u "$db_user" -p"$db_pwd" "$db_name" << 'SQLEOF'
+CREATE TABLE IF NOT EXISTS `lh_abstract_proactive_chat_invitation_one_time` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `visitor_id` bigint(20) NOT NULL,
+  `chat_id` bigint(20) DEFAULT NULL,
+  `chat_variables` longtext,
+  `invited_date` bigint(20) NOT NULL,
+  `invited` tinyint(1) NOT NULL DEFAULT 0,
+  `accepted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `visitor_id` (`visitor_id`),
+  KEY `chat_id` (`chat_id`),
+  KEY `invited_date` (`invited_date`)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SQLEOF
+
 # PHP-FPM CONFIGURATION
 ynh_script_progression "Configuring PHP-FPM..."
 
