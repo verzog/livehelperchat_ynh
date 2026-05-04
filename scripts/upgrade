@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS `lh_abstract_proactive_chat_invitation_one_time` (
   KEY `chat_id` (`chat_id`),
   KEY `invited_date` (`invited_date`)
 ) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `lh_departament_custom_work_hours`
+  ADD COLUMN IF NOT EXISTS `repetitiveness` int(11) unsigned NOT NULL DEFAULT 0;
 SQLEOF
 
 # PHP-FPM CONFIGURATION
