@@ -184,8 +184,9 @@ else
 fi
 sed -i "s|'site_address' => '.*'|'site_address' => '$site_address'|g" "$settings_file"
 
-# Namespace the PHP session cookie to avoid conflicts
-sed -i "s|php_session_cookie_name = .*|php_session_cookie_name = '${app}_session'|g" "$settings_file"
+# Namespace the PHP session cookie to avoid conflicts.
+# settings.ini.php uses PHP array syntax: 'key' => 'value', not ini-style.
+sed -i "s|'php_session_cookie_name' => '[^']*'|'php_session_cookie_name' => '${app}_session'|" "$settings_file"
 
 chown "$app:www-data" "$settings_file"
 chmod 640 "$settings_file"

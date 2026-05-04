@@ -70,9 +70,13 @@ SQLEOF
 
 # Disable debug_output left over from earlier install scripts that enabled it
 # as a temporary diagnostic. Safe no-op if already false.
+# Also repair php_session_cookie_name if it was left empty by an earlier
+# install script whose sed regex didn't match the PHP array syntax — an empty
+# cookie name silently breaks login (no session can be persisted).
 settings_file="$install_dir/settings/settings.ini.php"
 if [ -f "$settings_file" ]; then
     sed -i "s|'debug_output' => true|'debug_output' => false|" "$settings_file"
+    sed -i "s|'php_session_cookie_name' => ''|'php_session_cookie_name' => '${app}_session'|" "$settings_file"
 fi
 
 # PHP-FPM CONFIGURATION
